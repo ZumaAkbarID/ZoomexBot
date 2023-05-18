@@ -8,7 +8,6 @@ require("dotenv").config();
 
 // for fun
 const petPetGif = require('pet-pet-gif')
-
 const owner = "6281225389903";
 const app = express();
 const port = 3000;
@@ -57,7 +56,7 @@ client.on("ready", () => {
         if (isRegistered) {
             client.sendMessage(
                 owner + "@c.us",
-                "Assalamualaikum Mas Ganteng\nbot " + process.env.BOT_NAME + " sudah nyala"
+                "Assalamualaikum Mas\nbot " + process.env.BOT_NAME + " sudah nyala"
             );
         }
     });
