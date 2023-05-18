@@ -27,6 +27,6 @@ jobs:
           git status
           export NVM_DIR=~/.nvm
           source ~/.nvm/nvm.sh
+          npx kill-port 3000 -y
           npm install --only=prod
-          cp .env.example .env
           node index.js
