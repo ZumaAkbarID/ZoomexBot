@@ -150,7 +150,25 @@ client.on("message", (message) => {
         );
     }
 
-    if (getFirstCharacter(message.body) && parsePrefix(message.body) == "amikom-foto") {
+    if (!getFirstCharacter(message.body) && !parsePrefix(message.body)) {
+        message.reply(`Gunakan .menu untuk melihat menu`);
+    } else if (getFirstCharacter(message.body) && parsePrefix(message.body) == "menu") {
+        let text = '';
+        text += '+ Menu +';
+        text += '\n';
+        text += '```.amikom-foto <nim>';
+        text += '\n';
+        text += '.amikom-pet <nim> (working well soon)';
+        text += '\n';
+        text += '.cari-mhs <nama lengkap atau nim tanpa karakter . _>';
+        text += '\n';
+        text += '.menfess <nomor tujuan> <pesan>';
+        text += '\n';
+        text += '.menfess <nomor tujuan> <pesan>';
+        text += '\n';
+        text += '.balas-menfess <pesan> (hanya bisa dilakukan jika mendapat menfess) (soon)```';
+        message.reply(text);
+    } else if (getFirstCharacter(message.body) && parsePrefix(message.body) == "amikom-foto") {
         if (parseArgs(message.body)) {
             const patternNIM = /^\d{2}\.\d{2}\.\d{4}$/;
 
@@ -229,12 +247,6 @@ client.on("message", (message) => {
         } else {
             message.reply("Penggunaan salah.\ncommand: .amikom-foto <nim>\ncontoh: .amikom-foto 22.11.xxxx");
         }
-    } else if (getFirstCharacter(message.body) && parsePrefix(message.body) == "args") {
-        if (parseArgs(message.body)) {
-            message.reply("Parsed argument: \n" + parseArgs(message.body));
-        } else {
-            message.reply("ARGUMEN KOSONG!!!");
-        }
     } else if (getFirstCharacter(message.body) && parsePrefix(message.body) == "cari-mhs") {
         if (parseArgs(message.body)) {
             let kemendikAPI = 'https://api-frontend.kemdikbud.go.id/hit_mhs/' + encodeURIComponent(parseArgs(message.body));
@@ -256,6 +268,41 @@ client.on("message", (message) => {
                 });
         } else {
             message.reply("Penggunaan salah.\ncommand: .cari-mhs <nama lengkap atau nim tanpa karakter . _>\ncontoh: .cari-mhs Abdul Dudul Pesi\ncontoh: .cari-mhs 22114631");
+        }
+    } else if (getFirstCharacter(message.body) && parsePrefix(message.body) == "menfess") {
+        if (parseArgs(message.body)) {
+            const str = parseArgs(message.body);
+            const parts = str.split(" ");
+            const number = parts[0];
+            const text = parts.slice(1).join(" ");
+
+            // Validasi nomor
+            if (/^\d+$/.test(number)) {
+                if (number.length > 9) {
+                    // Validasi teks
+                    if (text.length > 0) {
+                        client.isRegisteredUser(number + "@c.us").then(function (isRegistered) {
+                            if (isRegistered) {
+                                client.sendMessage(
+                                    number + "@c.us",
+                                    "Hai kamu mendapat menfess dari seseorang berikut pesannya \n\n ```" + text + "```\n\n\nPesan berakhir\nKetik .menu untuk melihat menu"
+                                );
+                                message.reply('Pesan berhasil terkirim');
+                            } else {
+                                message.reply('Gagal terkirim nomor tidak terdaftar');
+                            }
+                        });
+                    } else {
+                        message.reply("Gagal\nPesan tujuan tidak boleh kosong");
+                    }
+                } else {
+                    message.reply("Gagal\nNomor tidak boleh kosong atau tidak valid");
+                }
+            } else {
+                message.reply("Gagal\nNomor tujuan harus berupa angka diawali kode negara");
+            }
+        } else {
+            message.reply("Penggunaan salah.\ncommand: <nomor tujuan> <pesan>\ncontoh: 628122538xxxx Halo apa kabar?");
         }
     }
 });
