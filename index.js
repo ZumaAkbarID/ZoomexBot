@@ -1,6 +1,6 @@
 const qrcode = require("qrcode-terminal");
 const axios = require("axios");
-const moment = require('moment');
+const url = require('url');
 const express = require("express");
 const fs = require('fs');
 const { Client, LocalAuth, MessageMedia } = require("whatsapp-web.js");
@@ -128,6 +128,16 @@ function parseArgs(str) {
     }
 }
 
+async function checkURLStatus(url) {
+    try {
+        const response = await axios.get(url);
+        return response.status;
+    } catch (error) {
+        console.error(`Terjadi kesalahan saat memeriksa URL ${url}:`, error.message);
+        throw error.response.status;
+    }
+}
+
 client.on("message", (message) => {
     if (getFirstCharacter(message.body)) {
         console.log(
@@ -139,10 +149,30 @@ client.on("message", (message) => {
 
     if (getFirstCharacter(message.body) && parsePrefix(message.body) == "amikom-foto") {
         if (parseArgs(message.body)) {
-            const media = await MessageMedia.fromUrl('https://via.placeholder.com/350x150.png');
-            message.reply(media);
+            const patternNIM = /^\d{2}\.\d{2}\.\d{4}$/;
+
+            if (patternNIM.test(parseArgs(message.body))) {
+                let fotomhsUrl = 'https://fotomhs.amikom.ac.id/20' + parseArgs(message.body).slice(0, 2) + '/' + parseArgs(message.body).replace(/\./g, '_') + '.jpg';
+
+                checkURLStatus(fotomhsUrl)
+                    .then(status => {
+                        MessageMedia.fromUrl(fotomhsUrl)
+                            .then(media => {
+                                message.reply(media);
+                            })
+                            .catch(error => {
+                                console.error("Terjadi kesalahan saat mengambil media:", error);
+                            });
+                    })
+                    .catch(error => {
+                        message.reply("NIM tersebut tidak memiliki foto");
+                    });
+            } else {
+                message.reply("format NIM tidak valid");
+            }
+
         } else {
-            message.reply("Penggunaan salah. Contoh yang benar :\n.amikom-foto 22.11.4xxx");
+            message.reply("Penggunaan salah.\ncommand: .amikom-foto <nim>\ncontoh: .amikom-foto 22.11.xxxx");
         }
     } else if (getFirstCharacter(message.body) && parsePrefix(message.body) == "args") {
         if (parseArgs(message.body)) {
@@ -150,6 +180,8 @@ client.on("message", (message) => {
         } else {
             message.reply("ARGUMEN KOSONG!!!");
         }
+    } else if (getFirstCharacter(message.body) && parsePrefix(message.body) == "amikom-fotos") {
+        // mau ngecek isMedia
     }
 });
 
