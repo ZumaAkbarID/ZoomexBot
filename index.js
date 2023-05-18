@@ -56,7 +56,7 @@ client.on("ready", () => {
         if (isRegistered) {
             client.sendMessage(
                 owner + "@c.us",
-                "Assalamualaikum Mas\nbot " + process.env.BOT_NAME + " sudah nyala"
+                "Assalamualaikum Mas Ganteng\nbot " + process.env.BOT_NAME + " sudah nyala"
             );
         }
     });
