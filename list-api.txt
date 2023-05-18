@@ -1,0 +1,17 @@
+NO Auth
+  Prodi
+    https://mhs.amikom.ac.id/api/support/master_prodi
+
+Auth
+  Init Khs
+    http://mhsmobile.amikom.ac.id/api/krs/init_khs
+  Init data mhs
+    http://mhsmobile.amikom.ac.id/api/personal/init_data_mhs
+  Jadwal kuliah
+    http://mhsmobile.amikom.ac.id/api/personal/jadwal_kuliah
+  List Presensi Matkul
+    http://mhsmobile.amikom.ac.id/api/presensi/list_mk
+  Presensi QR Mobile (inactive) (param location "Amikom")
+    http://202.91.9.14:6000/api/presensi_mobile/validate_qr_code
+  Auth Post (need device_id)
+    https://ds.amikom.ac.id/api/amikomone/auth

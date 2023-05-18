@@ -6,6 +6,9 @@ const fs = require('fs');
 const { Client, LocalAuth, MessageMedia } = require("whatsapp-web.js");
 require("dotenv").config();
 
+// for fun
+const petPetGif = require('pet-pet-gif')
+
 const owner = "6281225389903";
 const app = express();
 const port = 3000;
@@ -174,14 +177,86 @@ client.on("message", (message) => {
         } else {
             message.reply("Penggunaan salah.\ncommand: .amikom-foto <nim>\ncontoh: .amikom-foto 22.11.xxxx");
         }
+    } else if (getFirstCharacter(message.body) && parsePrefix(message.body) == "amikom-pet") {
+        if (parseArgs(message.body)) {
+            const patternNIM = /^\d{2}\.\d{2}\.\d{4}$/;
+
+            if (patternNIM.test(parseArgs(message.body))) {
+                let fotomhsUrl = 'https://fotomhs.amikom.ac.id/20' + parseArgs(message.body).slice(0, 2) + '/' + parseArgs(message.body).replace(/\./g, '_') + '.jpg';
+
+                checkURLStatus(fotomhsUrl)
+                    .then(status => {
+                        console.log("Pet URL Passed");
+                        petPetGif(fotomhsUrl, {
+                            resolution: 500
+                        })
+                            .then(animatedGif => {
+                                console.log("Pet Create Passed");
+                                // Buffer yang berisi data GIF
+                                const gifBuffer = animatedGif;
+
+                                // Path file tujuan untuk GIF
+                                const outputFilePath = 'temp/amikom-pet/' + parseArgs(message.body).replace(/\./g, '_') + '.gif';
+
+                                // Menulis buffer ke file GIF
+                                fs.writeFile(outputFilePath, gifBuffer, (error) => {
+                                    if (error) {
+                                        console.error('Terjadi kesalahan saat menulis file GIF:', error);
+                                    } else {
+                                        console.log('File GIF berhasil dibuat:', outputFilePath);
+                                        const media = MessageMedia.fromFilePath(outputFilePath);
+                                        message.reply(media);
+                                        setTimeout(() => {
+                                            client.sendMessage(message.from, "Fitur Pat-Pat masih dalam proses pengerjaan");
+                                        }, 5000);
+                                        fs.unlink(outputFilePath, (err) => {
+                                            if (err) throw err;
+                                        });
+                                    }
+                                });
+                            })
+                            .catch(error => {
+                                console.error("Terjadi kesalahan saat membuat pet-pet:", error);
+                            });
+                    })
+                    .catch(error => {
+                        message.reply("NIM tersebut tidak memiliki foto");
+                    });
+            } else {
+                message.reply("format NIM tidak valid");
+            }
+
+        } else {
+            message.reply("Penggunaan salah.\ncommand: .amikom-foto <nim>\ncontoh: .amikom-foto 22.11.xxxx");
+        }
     } else if (getFirstCharacter(message.body) && parsePrefix(message.body) == "args") {
         if (parseArgs(message.body)) {
             message.reply("Parsed argument: \n" + parseArgs(message.body));
         } else {
             message.reply("ARGUMEN KOSONG!!!");
         }
-    } else if (getFirstCharacter(message.body) && parsePrefix(message.body) == "amikom-fotos") {
-        // mau ngecek isMedia
+    } else if (getFirstCharacter(message.body) && parsePrefix(message.body) == "cari-mhs") {
+        if (parseArgs(message.body)) {
+            let kemendikAPI = 'https://api-frontend.kemdikbud.go.id/hit_mhs/' + encodeURIComponent(parseArgs(message.body));
+            axios.get(kemendikAPI)
+                .then(response => {
+                    const data = response.data;
+                    let text = '';
+                    let i = 1;
+                    for (const item of data.mahasiswa) {
+                        text += `${i++}. ${item.text}\nBiodata : https://pddikti.kemdikbud.go.id${item['website-link']}\n\n`;
+                    }
+                    message.reply("Berikut data *" + parseArgs(message.body) + "* yang ditemukan");
+                    setTimeout(() => {
+                        client.sendMessage(message.from, text);
+                    }, 3000);
+                })
+                .catch(error => {
+                    message.reply("Data mahasiswa *" + parseArgs(message.body) + "* tidak ditemukan");
+                });
+        } else {
+            message.reply("Penggunaan salah.\ncommand: .cari-mhs <nama lengkap atau nim tanpa karakter . _>\ncontoh: .cari-mhs Abdul Dudul Pesi\ncontoh: .cari-mhs 22114631");
+        }
     }
 });
 
