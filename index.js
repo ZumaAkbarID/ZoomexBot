@@ -10,7 +10,7 @@ require("dotenv").config();
 const petPetGif = require('pet-pet-gif')
 const owner = "6281225389903";
 const app = express();
-const port = 4631;
+const port = 3000;
 
 // Middleware untuk mengizinkan parsing body dalam format JSON
 app.use(express.json());
@@ -43,8 +43,13 @@ const client = new Client({
     // buat no gui kaya vps;
     authStrategy: new LocalAuth(),
     puppeteer: {
-        args: ["--no-sandbox"],
+        handleSIGINT: false,
+        headless: true,
+        args: ["--no-sandbox", '--disable-setuid-sandbox'],
+        takeoverOnConflict: true,
+        takeoverTimeoutMs: 10,
     },
+
 });
 
 client.on("qr", (qr) => {
@@ -306,7 +311,14 @@ client.on("message", (message) => {
     }
 });
 
-client.initialize();
+client.initialize()
+    .then(async () => {
+        const version = await this._client.getWWebVersion();
+        console.log(`WHATSAPP WEB version: v${version}`);
+    })
+    .catch((err) => {
+        console.error(err)
+    });
 
 app.listen(port, () => {
     console.log(`Server berjalan di http://localhost:${port}`);
