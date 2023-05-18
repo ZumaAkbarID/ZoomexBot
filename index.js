@@ -10,7 +10,7 @@ require("dotenv").config();
 const petPetGif = require('pet-pet-gif')
 const owner = "6281225389903";
 const app = express();
-const port = 3000;
+const port = 4631;
 
 // Middleware untuk mengizinkan parsing body dalam format JSON
 app.use(express.json());
